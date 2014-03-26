@@ -127,7 +127,7 @@ function report = ComparePhenotypeModelling(phenotype,action, ...
 
           % This sets up the intial conditions
           r = RetinalMap();
-          r.LoadExperimentConfigFile(filename);
+          r.loadExperimentConfigFile(filename);
           r.placeRetinalRGCdisk();
           r.placeSC();
           r.loadGradients(r.phenotype);
@@ -149,7 +149,7 @@ function report = ComparePhenotypeModelling(phenotype,action, ...
           
           % Setup neuron position and gradients
           r = RetinalMap();
-          r.LoadExperimentConfigFile(filename);
+          r.loadExperimentConfigFile(filename);
           r.placeRetinalRGCdisk();
           r.placeSC();
           r.loadGradients(r.phenotype);
@@ -202,7 +202,7 @@ function report = ComparePhenotypeModelling(phenotype,action, ...
 
           % Setup neuron position and gradients
           r = RetinalMap();
-          r.LoadExperimentConfigFile(filename);
+          r.loadExperimentConfigFile(filename);
           r.placeRetinalRGCdisk();
           r.placeSC();
           r.loadGradients(r.phenotype);

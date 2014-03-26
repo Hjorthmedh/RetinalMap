@@ -12,12 +12,19 @@ The RetinalMap object contains the code to set up the initial conditions for a s
 \b 0. Quickstart\
 
 \b0 \
-To take advantage of the optimised C-routines you need to first compile them (the file is in the @RetinalMap directory):\
+To take advantage of the optimised C-routines for the Koulakov model you need to first compile them (the file is in the @RetinalMap directory):\
 \
 mex 
-\f1\fs22 \CocoaLigature0 stepFastGlobal.c
-\f0\fs24 \CocoaLigature1 \
+\f1\fs22 \CocoaLigature0 stepFastGlobal.c\
 \
+If you want to run the Willshaw model you need to also compile this file:
+\f0\fs24 \CocoaLigature1 \
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
+
+\f1\fs22 \cf0 \CocoaLigature0 mex stepMarkerInductionC.c 
+\f0\fs24 \CocoaLigature1 \
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+\cf0 \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 \cf0 \CocoaLigature0 To get the map-analysis code, go to the parent directory and type:\
 
