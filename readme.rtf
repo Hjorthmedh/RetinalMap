@@ -1,0 +1,869 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf190
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fnil\fcharset0 Menlo-Regular;}
+{\colortbl;\red255\green255\blue255;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+
+\f0\fs24 \cf0 Author: Johannes Hjorth, jjjh2@cam.ac.uk\
+\
+The RetinalMap object contains the code to set up the initial conditions for a simulation. The simulation can then be run either using the built in koulakov model, or using an external model such as Gierer, Whitelaw and Cowan, or Willshaw (Markerinduction). There is also code for running the Grimbert and Cang model.\
+\
+
+\b 0. Quickstart\
+
+\b0 \
+To take advantage of the optimised C-routines you need to first compile them (the file is in the @RetinalMap directory):\
+\
+mex 
+\f1\fs22 \CocoaLigature0 stepFastGlobal.c
+\f0\fs24 \CocoaLigature1 \
+\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
+\cf0 \CocoaLigature0 To get the map-analysis code, go to the parent directory and type:\
+
+\f1\fs22 \
+ git clone git://github.com/davidwillshaw/map-analysis.git
+\f0\fs24 \CocoaLigature1 \
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+\cf0 \
+If you just want to reproduce the simulations used in our published study then the easiest way is to use the wrapper script ComparePhenotypeModelling. \
+\
+report = ComparePhenotypeModelling(phenotype,action, ...\
+                                                              expNum,plotFigures,kMask,model);\
+\
+Here phenotype specifies which phenotype you want to simulate, your standard options are 'WT','Isl2heterozygous', 'Isl2homozygous', 'ephrinA2mm', 'ephrinA5mm', 'ephrinA2mmA5mm' and 'TKO'; action is either 'run' or 'analyse'; plotFigures can be set to true or false; kMask is normally 0, it specifies if we should use any cis-interaction to mask the gradients; model is one of 'Gierer2D', 'koulakov', 'WhiteCow' or 'Markerinduction'.\
+\
+For example:\
+\
+report = ComparePhenotypeModelling(\'91WT\'92,\'92run\'92,1,1,0,\'92koulakov\'92);\
+\
+Once the simulation finishes you can use the same command but with 'analyse' as the action to get our first version of plots and summary sheets. However there is another version which has replaced it:\
+\
+report = makeFiguresForCompareArticle(phenotype,expRange,model,plotFigures)\
+\
+In our earlier example:\
+\
+report = makeFiguresForCompareArticle(\'91WT\'92,1,\'92koulakov\'92,1)\
+\
+\
+I would recommend using this second option, as it generates the figures relevant to the paper.\
+\
+
+\b 0.b Generating the figures for the paper
+\b0 \
+\
+If you want to regenerate all the modelling figures for the paper there are two commands you need to do.\
+\
+To run all simulations (in the terminal shell):\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
+
+\f1\fs22 \cf0 \CocoaLigature0 runCompareArticle
+\f0\fs24 \CocoaLigature1 \
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+\cf0 (or 
+\f1\fs22 \CocoaLigature0 runCompareArticleMac
+\f0\fs24 \CocoaLigature1 )\
+\
+To analyse all simulations (in matlab):\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
+
+\f1\fs22 \cf0 \CocoaLigature0 runCompareArticleMacAnalyseAll
+\f0\fs24 \CocoaLigature1 \
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+\cf0 \
+This will output the figures to 
+\f1\fs22 \CocoaLigature0 FIGS/ComparePhenotype
+\f0\fs24 \CocoaLigature1 \
+\
+\
+
+\b 1. Initialising the model\
+
+\b0   \
+Below is more detailed information that will be useful if you want to integrate your own model with the pipeline.\
+\
+When initialising the model the neuron positions in the retina and SC are calculated, and the gradients of Eph and ephrins are set depending on which phenotype was specified. If RetinalMap is called without an argument, an empty object is created:\
+\
+r = RetinalMap();\
+\
+Alternatively RetinalMap can be called with either an experiment specifying text file, or a mat file with a previously saved simulation.\
+\
+r  = RetinalMap('experiments/myfirstexperiment.txt');\
+r.run();\
+\
+To view an interactive map (the argument 1 indicates we want it interactive)\
+r.plotMapForward(1);\
+\
+Behind the scene the constructor initialise the code to the default parameters, and then replace the values of the parameters specified in the text file passed. It will then place the neurons using the dMin algorithm (see our paper or the code for details). The default method for specifying gradients is to select a phenotype, the corresponding gradients are then loaded from the file specified by gradientInfoFile, usually 'gradients/Eph-ephrins-both-axis-JH.csv' but there are others available in that directory, and you can specify your own. The CSV file has a column for each phenotype, where it specifies whether the receptor or ligand is present or not. On the corresponding line there are also fields for C0, C1, C2, C3 the parameters that specify that shape of the gradient (see our article).\
+\
+There are a few additional options available to modify the gradients if needed. For example you can add noise using RGCnoiseLevelN and SCnoiseLevelN. Higher values mean less noise, with the exception of the value of zero which means no noise. This is done using the addPoissonNoise function internally.\
+\
+There are multiple ways to represent the connection matrix of the models. The default method (and the one that all the analysis tools use) is using presynapticConnections and presynapticWeight. Here each column specifies a SC neuron. In presynapticConnections is the index of the RGC connected to a particular SC neuron and presynapticWeight gives the strength of the connections. The number of connections for each SC neuron is stored in numPresynapticConnections. You can convert between this representation, and a corresponding postsynaptic representation using r.convertConnectionTables('pre2post'). There is also the option to use a connection matrix instead. Remember that if your simulation uses a connection matrix representation, then you need to use r.convertConnectionTables('mat2pre') before using the analysis tools.\
+\
+\
+
+\b 2. Run the model\
+
+\b0 \
+To run the model, once it has been initialised simply type:\
+\
+r.run();\
+\
+Depending on which model you run, and the size of your simulation, this can take anything from a couple of minutes to days. The Gierer and Kolakov models are relatively quick, the Whitelaw and Cowan, and Willshaw models are slower.\
+\
+\
+
+\b 3. Analysing the map\
+\pard\pardeftab720\sl280
+
+\b0 \cf0 \
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+\cf0 There are many different functions available to analyse the map. For example to display an interactive map where you can explore the connectivity with the mouse, use r.plotMapForward(1). Here the 1 means interactive, 0 means static.\
+\
+There are a few different versions of that function, for example r.plotMapImage() lets you place an image on the retina and see how it is deformed.\
+\
+r.plotAxisProjection('NT') or you can pass it 'DV'. This generates a plot similar to the one Brown et al 2000, and Reber et al 2004, used to study the maps. \
+\
+r.plotGradients1D() will plot the gradients as a function of the NT, DV, AP and ML axis.\
+\
+virtualInjectionEctopicExperiment(0.3,0.6) does a virtual injection at NT=0.3, DV=0.6.\
+\
+To calculate the fraction of the SC that is covered by 99% of the synapses, we can use r.calculateSCcoverage(0.99).\
+\
+For Math5 you might want to plot the cumulative distributions of synapses using r.plotNumberOfSynapses('cumdist')\
+\
+For examples on how to use the above functions, see makeFiguresForCompareArticle.m\
+\
+\
+\
+\
+\
+
+\b A list of object variables\
+
+\b0 \
+\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+
+\i \cf0 simName
+\i0  - The name of the simulation\
+
+\i dataPath
+\i0  - The location where the data files belonging to the simulation are stored\
+
+\i figurePath
+\i0  - The location where the figures generated are saved\
+    \
+
+\i simID
+\i0  - Unique ID number for the simulation\
+
+\i timeStamp
+\i0  - Time of simulation creation\
+\
+
+\i gradientInfoFile
+\i0  - location of CSV file used to specify the EphA, EphB, ephrin-A and ephrin-B gradients in the retina and the SC\
+\
+
+\i curStep
+\i0  - current simulation step. A step is performed once all neurons have been updated on average ones. However, curStep tracks the number of add/remove operations in the simulation. One add plus one remove equals one step.\
+\
+
+\i time
+\i0  - simulation time, not used by all models\
+    \
+
+\i nSteps
+\i0  - total number of simulation steps, note that nSteps is multiplied by nRGC before comparing to curStep.\
+\
+
+\i reportStep
+\i0  - at what spacing are simulation states saved, just as with nSteps, reportStep is multiplied by nRGC before comparing to curStep.\
+\
+
+\i nRGC
+\i0  - Number of retinal ganglion cells in the simulation \
+nSC - Number of SC neurons in the simulation\
+\
+
+\i dMinPackingFactor
+\i0  - Used to estimate which dMin value to use based on the area available and the number of cells to place within it. \
+dMinPackingFactor3D - Similar to dMinPackingFactor but used when the structure is 3D.\
+\
+
+\i debugFlag
+\i0  - How verbose should we be with our outputs, turning this on enables more text output and a few extra figures used for debugging.\
+\
+
+\i plotFigures
+\i0  - Should plots be visible, or invisible?\
+\
+
+\i HDF5
+\i0  - Do we want to use default mat files when saving, or the HDF5 compability option?\
+\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+
+\b \cf0 Koulakov specific parameters 
+\b0 (see Triplett et al, 2011 or our paper for further explanation)\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+
+\i \cf0 aAct
+\i0 , 
+\i bAct
+\i0 , 
+\i gammaAct
+\i0 , 
+\i AComp
+\i0 , 
+\i BComp
+\i0 , 
+\i DComp
+\i0 ,  
+\i EComp
+\i0 , 
+\i alphaComp
+\i0 , 
+\i betaComp
+\i0 , 
+\i deltaComp
+\i0 , 
+\i epsilonComp
+\i0 , 
+\i alphaForwardChem
+\i0 ,  
+\i betaForwardChem
+\i0 ,  
+\i alphaReverseChem
+\i0 , 
+\i betaReverseChem
+\i0 , 
+\i alphaServoChem
+\i0  and 
+\i betaServoChem.
+\i0 \
+\
+\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+
+\b \cf0 New Koulakov specific parameter:\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+
+\i\b0 \cf0 actScaling
+\i0  - Extra parameter used to scale activity if the number of neurons is changed to maintain balance between the different energy terms.\
+typeFlag\
+\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+
+\b \cf0 Parameters that modify the gradients, or the way they interact with each other\
+
+\b0 \
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+
+\i \cf0 RGCnoiseLevelN
+\i0  - Noise level for RGC gradients, 0 = no noise, otherwise lower values = more noise\
+
+\i SCnoiseLevelN
+\i0  - Same as above but for SC gradients\
+    \
+Not used in this study:\
+
+\i lookupFileChem
+\i0  - lookup table for chemical reactions\
+
+\i gridMaxChem
+\i0  - upper range of Eph and ephrin in lookup table\
+
+\i nGridChem
+\i0  - Size of each dimension in the 4D grid. 20 gives 1e-3 abs error, 50 gives 1e-4 abs error\
+
+\i KtfChem
+\i0  - Trans forward rate \
+
+\i KtrChem
+\i0  - Trans reverse rate \
+
+\i KcaChem
+\i0  - Cis axon rate\
+
+\i KcdChem
+\i0  - Cis dendrite rate\
+
+\i chemInteractionLookup
+\i0  - It contains the total chemical component alpha*forwardReaction + beta*forwardReaction + alpha*reverseReaction + beta*reverseReaction. RGC are columns, SC are rows\
+\
+
+\i kMask
+\i0  - Should the gradients be masked before used in the simulations. 0 = no, 1 = use reaction scheme, 2 = subtractive. All models are only guaranteed to work with 0.\
+\
+\
+\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+
+\b \cf0 Retinal information\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+
+\i\b0 \cf0 eyeType
+\i0  - Is the retina a 'disk' or a 'sphere'? Only 'disk' used in our study.\
+
+\i RGCdensity
+\i0  - 'uniform' or 'varying', only using the former in our study.\
+\
+
+\i gradientGenerationMethod
+\i0  - 'phenotype' is used throughout this study, other partly supported options are 'naive' which is just exponentials and 'diffusion' which tries to calculate them based on some sources of substances that diffuse.\
+\
+
+\i phenotype
+\i0  - Which phenotype are we simulating: 'WT','Isl2heterozygous', 'Isl2homozygous', 'ephrinA2mm', 'ephrinA5mm', 'ephrinA2mmA5mm' or 'TKO'\
+    \
+\
+
+\i RGCnt
+\i0  - Location of RGC in the retina and in SC along Nasal-Temporal retinal coordinate: 0-1 (A)\
+
+\i RGCdv
+\i0  - Location of RGC in the retina and in SC along Dorsal-Ventral retinal coordinate: 0-1 (B)\
+\
+
+\i RGCphi
+\i0  - Spherical Retinal RGC coordinates, default option is to use cartesian coordinates, these values are then not set.\
+
+\i RGCtheta
+\i0  - Spherical Retinal RGC coordinates, Theta = pi at center of eye opening\
+\
+
+\i RGCntPadding
+\i0 , 
+\i RGCdvPadding
+\i0 , 
+\i paddingPhi
+\i0 , 
+\i paddingTheta
+\i0  - Coordinates of virtual padding cells around the retina, used for triangulation. Not used when using default methods to generate gradients.\
+\
+
+\i maxTheta
+\i0  - How big is the eye? Default: pi/180*(90+37) from Dan's data P0 (Sterratt mail 2 dec 2011)\
+\
+\
+\
+\
+
+\i RGCEphA
+\i0 , 
+\i RGCEphB
+\i0 , 
+\i RGCephrinA
+\i0 , 
+\i RGCephrinB
+\i0  - Levels of retinal EphA, EphB, ephrinA and ephrinB in the RGC neurons. These variables are used by all models.\
+   \
+\
+\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+
+\b \cf0 Extensions:\
+
+\b0 \
+
+\b RGC subtypes:\
+
+\b0 \
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+
+\i \cf0 nRGCtypes
+\i0  - How many subtypes of RGC neurons to use in the simulation, not used in this study, only supported by our version of the Koulakov model\
+
+\i RGCtype
+\i0  - Cell type, subpopulation ID\
+
+\i RGCdPop
+\i0  -Distance at which within subpopulation correlation falls below between subpopulation peak correlation.\
+\
+\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+
+\b \cf0 ML ingrowth bias:
+\b0 \
+\
+Note these parameters are Koulakov specific and relevant only when we allow local jumps, i.e. synapses can only be created near existing synapses belonging to the same axons.\
+    \
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+
+\i \cf0 RGCml
+\i0  - Where along the ML axis does the RGC axons enter the SC\
+
+\i RGCwidth
+\i0  - How wide is the RGC arbor (in ML direction) OBS: fraction of total width (scaled). This variable should be 2 or larger, otherwise synapse formation will be disabled. The stepFastGlobal.c function has done away with neighbourRGC. It might still be used when placing initial synapses for ML bias simulations. Those are not included in the paper.\
+
+\i RGCmlSpread
+\i0  - How uncertain is the ML entrance position?   \
+
+\i useLocalJumps
+\i0  - Do we allow synapses to form only close to existing synapses from the same axon, or anywhere in the SC. Default is false, they can form anywhere within the SC. (updateNeighboursTable needs to be called if this value is changed)\
+
+\i maxSynapseJumpLength
+\i0  - How far from existing synapses can new synapses form?\
+
+\i nInitSynapses
+\i0  - How many synapses are the Koulakov model initialised with. Only used if 
+\i useLocalJumps
+\i0  = true, otherwise the system starts without any synapses. The synapses will be placed within a segment of RGCwidth around axon\
+    \
+\
+SC information\
+    \
+
+\i SCap
+\i0  - Location of neurons in SC along Anterior-Posterior SC coordinates: 0-1 (A)\
+
+\i SCml
+\i0  - Location of neurons in SC along Medial-Lateral SC coordinates: 0-1 (B)\
+    \
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+
+\b \cf0 3D SC:\
+
+\b0 \
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+
+\i \cf0 SCz
+\i0  -  Location of neurons in SC along the Z axis in the SC\
+
+\i SCdepth
+\i0  - Depth of the SC\
+
+\i SC3Dflag
+\i0  - Is the SC 2D or 3D, default is 2D.\
+    \
+
+\i SCscale
+\i0  - Scale to turn normalized units into mm WT 60 days, default value 2.072, Dan Lyngholm, personal communication, 18 july 2012\
+\
+
+\i SCapPadding
+\i0 , 
+\i SCmlPadding
+\i0 , 
+\i SCzPadding
+\i0  - Similarly to the padding variables for the retina, not used by default.\
+    \
+
+\i SCephrinA
+\i0 , 
+\i SCephrinB
+\i0 , 
+\i SCEphA
+\i0 , 
+\i SCEphB
+\i0  - EphA, EphB, ephrin-A, ephrin-B levels in the SC neurons\
+\
+\
+
+\i Isl2PositiveRGC
+\i0  - Indexes of the RGC neurons which are Isl2 positive. Only useful for the Isl2-EphA3 knock-ins.\
+\
+\
+Only used for localJumps = true, and then only for the Koulakov model. Not used in the article.\
+\
+
+\i neighbourSC
+\i0  - For each SC, lists nearby SC neurons (including self) in a matlab cell array\
+
+\i neighbourRGC
+\i0  - For each SC, lists nearby RGC axons\
+    \
+
+\i nNeighbourSC
+\i0  - Number of neighbours for each SC neuron in the above cell array\
+
+\i nNeighbourRGC
+\i0  - Same as above, but for RGCs\
+    \
+
+\i SCmask
+\i0  - Internal variable, used by filterSCPosition.m\
+    \
+
+\i synapseNeighbourhood
+\i0  - Used only for local jumps, lists neighbours around SC neuron that a new RGC axon synapsing on this particular neuron can jump to.\
+    \
+
+\i nSynapseNeighbourhood
+\i0  - Number of possible positions per cell array position\
+\
+\
+\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+
+\b \cf0 Synapse connectivity\
+
+\b0 \
+This is the default representation of synaptic connections used within the framework.\
+\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+
+\i \cf0 presynapticConnections
+\i0  - For each SC neuron it specifies which presynaptic RGCs they have. One column per SC, NaN padded.\
+
+\i presynapticWeight
+\i0  - Connection strength. One column per SC, weight of each connection\
+\
+There are two additional ways to represent the connectivity that can then be converted to the above representation for analysis using convertConnectionTables.\
+    \
+
+\i postsynapticConnections
+\i0  - For each RGC, lists the post synaptic partners in the SC. One column per RGC, NaN padded\
+
+\i postsynapticWeight
+\i0  - Connection strength. One column per RGC, weight of each connection\
+    \
+
+\i connectionMatrix
+\i0  - The entire connectivity is contained within the matrix. One column per RGC, one row per SC\
+    \
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+
+\b \cf0 Book-keeping variables:\
+
+\b0 \
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+
+\i \cf0 numPresynapticConnections
+\i0  - How many connected RGC axons (per SC neuron)\
+
+\i numPostsynapticConnections
+\i0  - How many connected SC neurons (per RGC neuron)\
+    \
+
+\i totalWeightRGC
+\i0  - How many target SC synapses for each RGC axon\
+
+\i totalWeightSC
+\i0  - Total incoming weight for each SC\
+\
+
+\i maxConnections
+\i0  - How many different RGC can each SC be connected to at most. NaN = auto, allows connections to all neighbours within range auto only works for global jumps\
+\
+
+\i CAct
+\i0  - Activity correlation look up tables for the Koulakov model\
+
+\i UAct
+\i0  - Spatial SC correlation lookup table for the Koulakov model\
+\
+
+\i servoExp
+\i0  - Koulakov specific parameter, only used if servo mechanistic is used. Must be adjusted if non-naive gradients are used.\
+\
+At the actionIteration the actionHandler is called, both are vectors. The actionParameters are passed. The first one is a vector, and the other two are cell arrays. Each position corresponds to an interruption.\
+\
+        \
+
+\i RGCalive
+\i0  - RGC cell death, unused.\
+
+\i RGCcolour
+\i0  - Colour of RGC neuron, useful when having multiple subtypes.\
+\
+
+\i info
+\i0  - Empty struct to store information about the simulation\
+ \
+\
+\
+Functions:\
+\
+Initialisation:\
+\
+initializeRandomGenerator(obj)\
+Sets the random seed for the random number generator using the clock. This function provides compatibility with old versions of matlab also.\
+\
+LoadExperimentConfigFile(obj,configFile)    \
+Loads user specified configuration file, and sets the appropriate variables specified in the text file. See experiments directory for examples.\
+\
+placeRetinalRGCdisk(obj,minNum)\
+Places neurons in using dMin on a disk, centered around (0.5,0.5) with radius 0.5.\
+\
+setRGCdensity(obj)\
+Reduce the number of neurons on the retina in a biased way so as to create density variations that are proportional to what is reported in the literature (Jeon et al 1998).\
+\
+placeRGCdiskRealDensity(obj,n)\
+placeRetinalRGCdensity(obj,nRGC)\
+Two versions of functions to create a disk with realistic density on the retina. Did not get used in our study, leaving the code in there for the future.\
+\
+setNumberOfRGC(obj,nRGC,idx)\
+Reduces the number of RGCs to the specific value given. The idx variable is optional, if the user wants to specify which RGCs to keep.\
+\
+setNumberOfSC(obj,nSC)\
+Reduces the number of SC neurons.\
+\
+placeRetinalRGCsphere(obj,minNum)\
+Places the neurons on a sphere. This uses the old faster version of generating neuron positions (Halton sets).\
+\
+placeSC(obj,make3D)\
+Places neurons on the SC. If make3D is set to true the neurons will also be spread along the Z-axis.\
+\
+placeSCregularGrid(obj)\
+Place neurons on the SC, but using a regular grid instead of dMin and shape of SC.\
+\
+makeNaiveGradients(obj, varargin)\
+Setting up simple exponential gradients.\
+\
+maskGradients(obj, plotFlag)\
+Masking of gradients by cis interaction, modelled by a reaction scheme.\
+\
+maskGradientsSubtractive(obj)\
+Masking of gradients by cis interaction, subtracting the counter gradients from the gradients.\
+  \
+setupGradients(obj)\
+Creates gradients for the retina and SC.\
+\
+setupInitialConnectivity(obj)\
+In the normal case this function only creates an empty set of connections. However, it can also place synapses randomly or using the ML bias reported in Plas et al 2005.\
+\
+surgery(obj,type)\
+Perform virtual surgery, you can do removeNasalRetina, removeTemporalRetina, removePosteriorSC and rotateRetinaCentre.\
+    \
+d = retinalDistance(obj)\
+d = SCDistance(obj)\
+Calculate the distance between all RGCs, and between all SC neurons.\
+    \
+updateNeighboursTables(obj)\
+Update neighbourhood tables associated with current set of neurons.\
+\
+calculateCU(obj)\
+calculateCU3D(obj) % Used for 3D SC\
+Calculate the spatial correlation functions\
+\
+modifyActivityComponent(obj,gammaAct,bAct,aAct)\
+This function is useful if you want to change the activity parameters during a simulation\
+\
+calculateAlternativeU(obj)\
+Calculate a sharper U drop, with a bigger basin\
+    \
+makeReactionLookupFile(obj, matlabPoolSize)\
+makeReactionLookupTable(obj)\
+Used to calculate the chemical reaction scheme\
+\
+[RaLd, LaRd,RaLa, RdLd] = receptorLigandReactionSteadyState(obj, Ra0, La0, Rd0, Ld0)\
+\
+These functions are used by the original step function (which behaves similarly to stepFast.c). Please note stepFastGlobal.c is different if RGCwidth has small values, which affects stepFast but not stepFastGlobal.\
+RGCidx = getRandomNewRGC(obj,SCidx)\
+RGCidx = getRandomExistingConnection(obj,SCidx)\
+addSynapse(obj, SCidx, RGCidx)\
+removeSynapse(obj, SCidx, RGCidx)\
+    \
+[Etotal,Echem,Eact,Ecomp] = calculateTotalEnergy(obj)\
+[Eadd,Echem,Eact,Ecomp] = calculateSynapseAdditionEnergy(obj,SCidx,RGCidx)\
+[Eremove,Echem,Eact,Ecomp] = calculateSynapseRemovalEnergy(obj,SCidx,RGCidx)\
+Esynapse = calculateSynapseActivityEnergy(obj,SCidx,RGCidx,addFlag)\
+Esynapse = calculateSynapseCompetitionEnergy(obj,SCidx,RGCidx,addFlag)\
+Esynapse = calculateSynapseChemicalEnergy(obj,SCidx,RGCidx)\
+\
+Test functions using the global energy instead\
+[Etotal,Echem,Eact,Ecomp] = calculateTotalEnergyGlobal(obj)\
+\
+\
+Load and save model state\
+saveState(obj, fileName)\
+loadState(obj, fileName, skipTables)\
+saveIter(obj, fileName)\
+iterSequence = loadIterSequence(obj,skipTables,iter,dataPath,fileNameMask,uniqueFlag)\
+seqFilt = filterSequence(obj,seq,stepSize,skipZeroFlag,keepFirstNonZeroFlag)\
+\
+Projection/plotting helper functions    \
+[RGCcentAP,RGCcentML] = RGCprojectionCentroids(obj)\
+[RGCmaxAP,RGCmaxML] = RGCprojectionMax(obj,useTableFlag)\
+[SCmaxNT,SCmaxDV] = SCprojectionMax(obj,useTableFlag)\
+[RGCcol,SCcol] = getNeuronColoursFromImage(obj,refImageName,flipImg)\
+    \
+\
+Export and import functions, handling different formats\
+importConnectionMatrix(obj,connectionFile,stateFile)\
+importConnectionIndexes(obj,indexFile,weightFile,stateFile)\
+exportGradients(obj)\
+exportMapToDavid(obj);\
+    \
+convertConnectionTables(obj,action);\
+This function converts between a presynaptic or postsynaptic\
+representation of the connectivity\
+    \
+[k, kLow, kHigh] = fitErrorEstimate(obj,x,y,func,k0,nRep)\
+    \
+[xRange,yMedian,yLow,yHigh,yAll] = fitErrorEstimateN(obj,x,y,func,k0,nRep,nPoints)   \
+yLow is 2.5% percentile, and yHigh is 97.5% percentile\
+\
+[k,kAll,xRange,yMedian,yAll] = fitJackKnife(obj,x,y,func,k0)    \
+[xRange,yMedian,yAll] = loessJackKnife(obj,x,y)\
+\
+shareAxis(figs)\
+\
+MEX helper functions\
+F = kernelRegressionMEX(obj,x,y,w,k,X,Y);\
+\
+F = estimateKernelMismatchMEX(obj,w,k);\
+F = estimateKernelMismatchMEXsorted(obj,RGCntSorted,RGCdvSorted,wSorted,k,nz);\
+MEXsorted is slightly faster than MEX, but VEC version is fastest (see contourAnalysis)    \
+\
+    \
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+
+\b \cf0 Run functions\
+
+\b0     \
+step(obj,nSteps)\
+stepMex(obj,nSteps)\
+Please use stepMex instead, which uses the faster C-code. Also note that step.m behavious like stepFast.c, which differs slightly from stepFastGlobal.c (the latter behaves likes Koulakov\'92s default model, the former also does but only if RGCwidth >= 2, which is default value).\
+\
+[stepCtr, stepEnergy] = testconvergence(obj)\
+\
+    \
+actionHandlerSetParam(obj,aParam);    \
+Action handler that takes input\
+aParam = \{\{'varName1',varValue1\},\{'varName2',varValue2\},...\}\
+and sets obj.varName1 = varValue1; etc.\
+    \
+
+\b Analysis functions
+\b0 \
+    \
+allEqual = paramDiff(obj,otherObj)\
+Internal check function to see what parameters differ between two RetinalMap objects\
+    \
+plotRetinaRGCdisk(obj)\
+plotRetinalRGCsphere(obj,refNeuron)\
+Show neuron positions in the retina, Isl2 positive neurons are marked.\
+\
+fig = plotGradients1D(obj)\
+fig = plotGradients2D(obj, invertSCephrinA, forwardOnly, markIsl2)\
+plotRetinalGradient3D(obj, gradient, color)\
+fig = plotEphrinInSC(obj)\
+plotRetinalGradient2D(obj)\
+plotRetinalDistVsGradient(obj, origoNeuron, gradient)\
+plotRetinalGradientDisk(obj)\
+Plot the gradients.\
+\
+fig = plotMapReverse(obj,interactiveFlag,SCcol,RGCcol,markIsl2)\
+fig = plotMapForward(obj,interactiveFlag,markIsl2)\
+fig = plotMapImage(obj,refImageName,interactiveMap,flipImg)\
+Default plotting methods.\
+\
+plotAxonTerminationCentroids(obj,onlyPlotSCflag)\
+Plots projection centroids of RGCs. The other functions plot the SC with different colours depending on what the colour of the presynaptic RGCs.\
+    \
+plotMap(obj)\
+Plot function for 3D retina\
+   \
+[RGCidx,SCidx] = makeVirtualInjection(obj,SCap,SCml,injRadius) \
+[fig,sp] = plotVirtualInjection(obj,SCidx,RGCidx,SCidx2,RGCidx2)\
+These functions make retrograde virtual injections and \
+    \
+fig = virtualInjectionMappingExperiment(obj,axis)\
+[SCdistance,retinaFlipFlag] = virtualInjectionVectorExperiment(obj,axisDir,nRep) \
+fig = plotVirtualExperimentVector(obj,axisDir, titleStr)\
+\
+\
+distHist = mapPairDistanceHistogram(obj,nBins)    \
+This function looks at all pairs of RGC, and calculates the distance between their projection centroids in the SC. It excludes "self" pairs\
+\
+fig = plotAxisProjection(obj, showAxis, useAll, reuseFigFlag,p lotType, saveFigFlag, weightScale, alpha, showExpFlag)\
+plotAxisMap(obj, axisDir, nBins, axisRange, colorbarFlag, plotFlag);\
+    plotBothAxisMaps(obj)\
+Plots projection along NT or DV axis. The first function, plotAxisProjection is used by makeFiguresForCompareArticle.m\
+\
+[distance, segregation,k,kLow,kHigh] = ...\
+      virtualInjectionSegregationExperiment(obj, injectionType, nRep, maxDist, k0);\
+Segregation experiment similar to what Lyngholm et al does. Used to assess map precision.\
+\
+[hasEctopic,fig] = virtualInjectionEctopicExperiment(obj,RGCnt, RGCdv, injectionRadius);    \
+Injections in retina, analyses the termination zone(s) in the SC. Automatic ectopic detection.\
+\
+\
+fig = plotTerminationZoneSize(obj,sequence,percentile,titleText)\
+fig = plotTerminationZoneSizeCompare(obj,sequences,percentile,legendText,colours)\
+Plot the size of the termination zones as a function of simulation steps.\
+\
+NT = locateCollapsePoint(obj,debugFlag)    \
+Automatically detect location of collapse point in heterozygous Isl2-EphA3.\
+\
+plotSC(obj,noAxisFlag)\
+plotSCinputIdentity(obj)\
+Plot functions for the SC.\
+\
+plotInputClustering(obj)\
+This is useful if different subtypes of RGCs are simulated. It analyses whether SC neurons get input from one type of RGC, or multiple.\
+\
+[areaCoverage,kEst,fig] = ...\
+      contourAnalysis(obj,RGCidx,percentile,RGCweights,SCidx,plotFlag,kEst,approxFlag)\
+[areaCoverage,kEst,fig] = contourAnalysisKDE(obj, RGCidx, ...\
+                                                 percentile, plotFig)\
+Contour analysis, similarly to the one done in Sterratt et al. To speed it up, pass kEst if it is already known. The KDE version is the one used in makeFiguresForCompareArticle.m\
+\
+makeMapMovie(obj,iterSequence, RGCidx, SCidx, resolution, frameRate)\
+Creates a movie from the sequence of how the map converges.\
+    \
+fig = plotNumberOfSynapses(obj,plotType,oldFig)\
+Plot the number of synapses in the SC. Several different modes: map, hist, cumdist, time\
+\
+inspectPotential(obj,addFlag,SCidx)\
+inspectSelfAddCost(obj)\
+Plots to visualise energy.\
+\
+[nearestNeighbourRegularityIndex, voronoiRegularityIndex] = ...\
+        nearestNeighbourStatistics(obj,structure,X,Y)\
+Spatial statistics.\
+\
+\
+[dEadd,dEremove] = sampleRelativeEnergyStrength(obj, nSamples, type);\
+What does the energy landscape look like?\
+    \
+[MCscore, MCratio] = calculateMapCoherency(obj)\
+Dabbling with measures for map coherency. Read at your own risk.\
+\
+fracCovered = calculateSCcoverage(obj,synapseFrac)\
+How large fraction of the SC is covered by a certain fraction of synapses.\
+    \
+[TZspreadInj,nRGCLabeled,nSCLabeled] = ...\
+        calculateTerminationZoneSizeInjection(obj,nRep,percentile,plotFlag)\
+TZspread95 = calculateTerminationZoneSize(obj)\
+RFspread95 = calculateReceptiveFieldSize(obj)\
+plotMapSpread(obj, interactiveFlag)\
+\
+[grid,fig] = makeProjectionGrid(obj, nPoints, radius, debugFigs)\
+My old version of the lattice analysis. We decided to go with DW\'92s code in the end.\
+\
+[k,fig] = plotVirtualExperimentSegregation(obj,axisDir,titleText, ...\
+                                                    refCurves,refColour,lengthScale,legendText)    \
+[k,iter,fig] = plotVirtualExperimentSegregationSequence(obj,axisDir,sequence,plotPoints,titleText)\
+placeIterationsOnDevelopmentalTimeline(obj)\
+matchIterationToAgeSegregationExperiment(obj,injectionType,nRep)\
+[age,bestIter] = matchIterationToAgeSegregationExperimentScore(obj)\
+[age,bestIter] =  matchIterationToAgeSegregationExperimentDist(obj,normaliseSize)        \
+These functions are used for the B2KO article.\
+\
+[bestIter,bestIdx,kFit,kMatch] = findSegregationCrossing(obj,matchObj,kMatch,stopAtIter)\
+Used for supplementary figure, B2KO article\
+    \
+[age,kWT,kB2KO, kWTJK, kB2KOJK] = fitSegregationData(obj,scaleDist,visibleFlag)\
+[k,kLow,kHigh] = fitSegregation(obj,distance,segregation,k0)\
+These two functions are used to analyse the segregation data from Lyngholm et al    \
+        \
+report = makeReport(obj, plotFigures, DWgrid)\
+This command generates the old style report sheet with information about the simulation in question. If the DWgrid variable is set to true it will call the external lattice code to generate those figures.\
+    \
+loadAndDo(obj,directory,pattern,action);\
+This command can be useful when you need to perform an action on multiple simulations, for example regenerate a plot for all of them.\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
+
+\f1\fs22 \cf0 \CocoaLigature0 \
+r = RetinalMap();\
+r.loadAndDo('SAVE/ComparePhenotype','Comp*mat','plotAxisProjection(''NT'',false,false,''hist'',true); close all;')\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+
+\f0\fs24 \cf0 \CocoaLigature1 \
+\
+}

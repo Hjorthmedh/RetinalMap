@@ -1,0 +1,29 @@
+% This is an example experimentfile to set up a simple simulation
+% All these parameters have default values set in RetinalMap.m that you can override here
+
+% Number of RGCs and SC cells
+obj.nSC = 1000;
+obj.nRGC = 1000;
+
+% This gives us a WT map, using gradients specified in the default gradient file (obj.gradientInfoFile)
+obj.gradientGenerationMethod = 'phenotype';
+obj.phenotype = 'WT';
+
+% Turn off noise in the system
+% Low values = higher noise, with the exception that 0 is hardcoded to be no noise
+
+obj.RGCnoiseLevelN = 0;
+obj.SCnoiseLevelN = 0;
+
+% Name of your simulation
+obj.simName = 'MyFistSimulation';
+
+% Number of simulation steps
+obj.nSteps = obj.nRGC*2000;
+
+% How often do we save the state of the simulation
+obj.reportStep = obj.nRGC*2000;
+
+
+% Should we display the figures, or do things quietly?
+obj.plotFigures = true;

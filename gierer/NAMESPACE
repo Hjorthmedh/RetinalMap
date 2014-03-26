@@ -1,0 +1,5 @@
+exportPattern("^[[:alpha:]]+")
+
+
+## Load in the shared object; this used to be done in zzz.R
+useDynLib(gierer)

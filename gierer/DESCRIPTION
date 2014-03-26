@@ -1,0 +1,11 @@
+Package: gierer
+Type: Package
+Title: 2d simulation of Gierer (1983).
+Version: 0.13
+Depends: sjevor
+Suggests: sjedmin
+Date: 2013-06-20
+Author: David Nissenbaum, Stephen Eglen
+Maintainer: Stephen Eglen <sje30@cam.ac.uk>
+Description: Simulates the Gierer model of retinotopic map formation.
+License: GPL
