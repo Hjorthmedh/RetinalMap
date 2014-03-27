@@ -1,0 +1,98 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage{verbatim}
+
+
+\begin{document}
+
+\title{Running the WhitelawCowan Simulations}
+\maketitle
+
+\author{Catherine Cutts}
+\date
+
+\tableofcontents
+
+\section{Introduction and Installation}
+The two dimensional Whitelaw and Cowan model was implemented in R and C by Catherine Cutts. The package is available as a source package, which should be available with the paper. If not, please contact me. 
+
+This is an R package which should be installed from the command line.
+It does however require an extra package to be installed, so first do:
+
+\begin{verbatim}
+$ R
+> install.packages(c('fields'))
+\end{verbatim}
+
+If that works okay, change into the top-level directory of the program
+\begin{verbatim}
+$ cd /path/to/koulakov
+$ R CMD INSTALL WhitelawCowan
+\end{verbatim}
+
+If this installs correctly, you should see the process end with:
+
+\begin{verbatim}
+* DONE (WhitelawCowan)
+\end{verbatim}
+
+You can then test the package by doing the following to run an
+example simulation without using the pipeline.
+
+\begin{verbatim}
+$ R
+> require(WhitelawCowan)
+> example('WhitelawCowan-package')
+\end{verbatim}
+
+This short example will take about 5 minutes on a modern computer.
+
+\section{Running within R}
+After the packages have been installed the package must be loaded within the R environment before simulations can be run:
+
+\begin{verbatim}
+require(WhitelawCowan)
+\end{verbatim}
+
+The file \verb=run_WC.R= contains the code to run the model. Parameters are hard coded into this function. The function requires three inputs: two data files containing the locations and gradient information associated with each RGC (file called \verb=rgc.file= in code) and SC neuron (called \verb=sc.file=). The third file (\verb=op.file=) gives the name of the file to which the code writes the simulation output (the final connection matrix). 
+
+The following command runs the simulation from within the R environment:
+
+\begin{verbatim}
+run_WC(rgc.file,sc.file,op.file)
+\end{verbatim}
+
+The output written to the file \verb=op.file= is the final matrix of connections from RGCs (rows) to SC neurons (columns) as ordered in the input files. This file is in the correct format to be analysed in the pipeline. 
+
+\section{Running within the MATLAB pipeline}
+The R package integrates into the MATLAB pipeline. Before calling the Whitelaw and Cowan simulation, MATLAB generates two files \verb=rgc.file= and \verb=sc.file= containing the position and gradient information of each neuron. The location of these files, along with the location of the generated output weight file is written into a parameter file. This parameter file is then written to an R script \verb=runWhiteCow.R=. This R script reads in parameter file and runs the simulation. The matlab function \verb=ComparePhenotypeModelling= is the quickest way to run a simulation and allows the user to specify a phenotype and identifier to be used in the output file. For instance the call
+
+\begin{verbatim}
+ComaparePhenotypeModelling('TKO','run',1010,false,0,'WhiteCow');
+\end{verbatim}
+
+Runs a WhitelawCowan simulation for the Triple Knock Out Phenotype with identifier ``1010". See pipeline documentation for more details. 
+
+\section{Parameters}
+ The following are hard coded:
+
+\begin{tabular}{ l l}
+\hline
+Parameter & Value \\
+\hline 
+$d_r$ & 0.07 \\
+$d_SC$ & 0.0289 \\
+$\mu$ & 0.1 \\
+$\Delta t$ & 0.0001 \\
+$W_{min}$ & 0.00001 \\
+$k$ & 1 \\
+$\alpha$ & 0.1 \\
+Number of epochs & 20000 \\
+
+\hline
+\end{tabular}
+ 
+\section{Notation}
+As the the code is optimised there are differences between notation 
+
+\end{document}

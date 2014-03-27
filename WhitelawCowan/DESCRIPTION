@@ -1,0 +1,12 @@
+Package: WhitelawCowan
+Type: Package
+Title: Two dimensional Whitelaw and Cowan
+Version: 1.2
+Date: 2013-06-10
+Author: Catherine Cutts 
+Depends: fields
+Maintainer: Catherine Cutts <C.Cutts@damtp.cam.ac.uk>
+Description: Runs two-dimensional Whitelaw and Cowan model simulations with parameters used in the paper. 
+License: GPL
+LazyLoad: yes
+Packaged: 2013-06-19 09:36:58 UTC; cc511

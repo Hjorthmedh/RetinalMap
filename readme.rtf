@@ -1,5 +1,6 @@
 {\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf190
-{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fnil\fcharset0 Menlo-Regular;}
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fnil\fcharset0 Menlo-Regular;\f2\froman\fcharset0 Times-Roman;
+}
 {\colortbl;\red255\green255\blue255;}
 \paperw11900\paperh16840\margl1440\margr1440\vieww10800\viewh8400\viewkind0
 \pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
@@ -21,20 +22,50 @@ To take advantage of the optimised C-routines for the Koulakov model you need to
 mex 
 \f1\fs22 \CocoaLigature0 stepFastGlobal.c\
 \
-on a Mac you might need to do something like (otherwise you might run the latex mex instead of the matlab mex, check \'93which mex\'94):\
-\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
-\cf0 \
-/Applications/MATLAB_R2013b.app/bin/mex stepFastGlobal.c\
-\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
-\cf0 \
-If you want to run the Willshaw model you need to also compile this file:
-\f0\fs24 \CocoaLigature1 \
+\
+
+\f0\fs24 If you want to run the Willshaw model you need to also compile this file:\CocoaLigature1 \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\f1\fs22 \cf0 \CocoaLigature0 mex stepMarkerInductionC.c 
+\f1\fs22 \cf0 \CocoaLigature0 \
+mex stepMarkerInductionC.c 
 \f0\fs24 \CocoaLigature1 \
 \pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
 \cf0 \
+\
+Detailed instructions for how to install the Whitelaw model are in the WhitelawCowan directory, please see WhitelawCowan_manual.pdf. In short you do the following:\
+\
+In R:\
+\pard\pardeftab720\sa240
+
+\f1\fs22 \cf0 install.packages(c(\'92fields\'92))\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+
+\f0\fs24 \cf0 In the shell:\
+\pard\pardeftab720
+
+\f1\fs22 \cf0 cd /path/to/koulakov\
+$ R CMD INSTALL WhitelawCowan\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+
+\f0\fs24 \cf0 \
+\
+For detailed Gierer installation instructions, please see gierer/inst/running_gierer.pdf. The short instructions are as follows:\
+\
+At the R prompt:\
+\pard\pardeftab720
+
+\f1\fs22 \cf0 install.packages(c("sjevor"), contriburl="http://damtp.cam.ac.uk/user/eglen/r/")\
+\
+In the shell:\
+cd /path/to/koulakov\
+R CMD INSTALL gierer
+\f2\fs30 \
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+
+\f0\fs24 \cf0 \
+\
+\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 \cf0 \CocoaLigature0 To get the map-analysis code, go to the parent directory and type:\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
@@ -44,6 +75,9 @@ If you want to run the Willshaw model you need to also compile this file:
 \f0\fs24 \CocoaLigature1 \
 \pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
 \cf0 \
+The RetinalMap and one map-analysis directories should now be in the same folder.\
+\
+\
 If you just want to reproduce the simulations used in our published study then the easiest way is to use the wrapper script ComparePhenotypeModelling. \
 \
 report = ComparePhenotypeModelling(phenotype,action, ...\

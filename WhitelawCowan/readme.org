@@ -1,0 +1,26 @@
+
+* OBSOLETE -- this is now in .tex file.
+* Installation
+
+This is an R package which should be installed from the command line.
+It does however require an extra package to be installed, so first do:
+
+$ R
+> install.packages(c('fields'))
+
+If that works okay, change into the top-level directory of the program
+
+$ cd /path/to/koulakov
+$ R CMD INSTALL WhitelawCowan
+
+If this installs correctly, you should see the process end with:
+
+* DONE (WhitelawCowan)
+
+You can then test the package by doing the following to run an
+example simulation without using the pipeline.
+
+$ R
+> require(WhitelawCowan)
+> source(system.file('runme.R', package='WhitelawCowan'))
+
