@@ -1,2 +1,0 @@
-echo "Running multiple simulations in parallel:"
-cat experiments/Phenotype/CompareArticle-joblist.txt | parallel -j3 matlab -nodesktop -nosplash -r {} 
