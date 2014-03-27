@@ -51,9 +51,9 @@ double *numPresynapticConnections;
 double *totalWeightRGC;
 double *totalWeightSC;
 
-// mxArray *neighbourRGC;
+/* mxArray *neighbourRGC; */
 mxArray *neighbourSC;
-// int *nNeighbourRGC;
+/* int *nNeighbourRGC; */
 int *nNeighbourSC;
 int maxConnections;
 int nRGC, nSC;
@@ -142,10 +142,10 @@ void mexFunction( int nlhs, mxArray *plhs[],
   
   /*** Read additional data from the RetinalMap object ***/
   
-  // neighbourRGC = mxGetProperty(prhs[0],0,"neighbourRGC");
+  /* neighbourRGC = mxGetProperty(prhs[0],0,"neighbourRGC"); */
   neighbourSC = mxGetProperty(prhs[0],0,"neighbourSC");
   
-  // nNeighbourRGC = mxGetData(mxGetProperty(prhs[0],0,"nNeighbourRGC"));
+  /* nNeighbourRGC = mxGetData(mxGetProperty(prhs[0],0,"nNeighbourRGC")); */
   nNeighbourSC = mxGetData(mxGetProperty(prhs[0],0,"nNeighbourSC"));
   
   maxConnections = (int) mxGetScalar(mxGetProperty(prhs[0],0,"maxConnections"));
