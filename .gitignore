@@ -10,6 +10,8 @@
 *.png
 *.mat
 *.fig
+*.dvi
+*.log
 SAVE/*
 *out
 FIGS/*

@@ -8,6 +8,10 @@
 \
 The RetinalMap object contains the code to set up the initial conditions for a simulation. The simulation can then be run either using the built in koulakov model, or using an external model such as Gierer, Whitelaw and Cowan, or Willshaw (Markerinduction). There is also code for running the Grimbert and Cang model.\
 \
+Github repository:\
+\
+https://github.com/Hjorthmedh/RetinalMap.git\
+\
 
 \b 0. Quickstart\
 
@@ -17,6 +21,12 @@ To take advantage of the optimised C-routines for the Koulakov model you need to
 mex 
 \f1\fs22 \CocoaLigature0 stepFastGlobal.c\
 \
+on a Mac you might need to do something like (otherwise you might run the latex mex instead of the matlab mex, check \'93which mex\'94):\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
+\cf0 \
+/Applications/MATLAB_R2013b.app/bin/mex stepFastGlobal.c\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+\cf0 \
 If you want to run the Willshaw model you need to also compile this file:
 \f0\fs24 \CocoaLigature1 \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
@@ -27,8 +37,9 @@ If you want to run the Willshaw model you need to also compile this file:
 \cf0 \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 \cf0 \CocoaLigature0 To get the map-analysis code, go to the parent directory and type:\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\f1\fs22 \
+\f1\fs22 \cf0 \
  git clone git://github.com/davidwillshaw/map-analysis.git
 \f0\fs24 \CocoaLigature1 \
 \pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
