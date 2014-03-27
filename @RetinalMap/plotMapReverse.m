@@ -351,8 +351,8 @@ function fig = plotMapReverse(obj,interactiveFlag,SCcol,RGCcol,markIsl2)
   
   function [map,mapWeight,numCon] = RGCtoSCmap()
     
-    map = zeros(max(obj.totalWeightRGC),obj.nRGC);
-    mapWeight = zeros(max(obj.totalWeightRGC),obj.nRGC);
+    map = zeros(ceil(max(obj.totalWeightRGC)),obj.nRGC);
+    mapWeight = zeros(ceil(max(obj.totalWeightRGC)),obj.nRGC);
     targetCtr = zeros(1,obj.nRGC);
     
     for i = 1:obj.nSC
