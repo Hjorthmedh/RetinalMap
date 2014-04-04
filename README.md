@@ -23,10 +23,12 @@ The Gierer and Whitelaw models are distributed as R packages. The
 detailed instructions for them can be found in a PDF in respective subdirectory.
 
 In R:
+
     install.packages(c("sjevor"), contriburl="http://damtp.cam.ac.uk/user/eglen/r/")
     install.packages(c(“fields”))
 
 In the shell (make sure you are in the RetinalMap directory):
+
     R CMD INSTALL gierer
     R CMD INSTALL WhitelawCowan
 
@@ -42,8 +44,7 @@ and YOUR_PATH/map-analysis.
 
 To run a simulation using the framework we use:
 
-    report = ComparePhenotypeModelling(phenotype,action, ...
-                                                                 expNum,plotFigures,kMask,model);
+    report = ComparePhenotypeModelling(phenotype,action,expNum,plotFigures,kMask,model);
 
 Here `phenotype specifies which phenotype you want to simulate, your
 standard options are `'WT'`,`'Isl2heterozygous'`, `'Isl2homozygous',
