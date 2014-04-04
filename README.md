@@ -9,7 +9,7 @@ Cang model.
 URL for github repository, this will create a RetinalMap directory:
 https://github.com/Hjorthmedh/RetinalMap.git
 
-#Installation
+##Installation
 
 To be able to run all the models you need to compile the C
 routines. They are located in the RetinalMap/@RetinalMap directory, and in the
@@ -38,7 +38,7 @@ directory of RetinalMap. To get the Lattice analysis code:
 You should now have the two packages installed in the same directory, ie. YOUR_PATH/RetinalMap
 and YOUR_PATH/map-analysis.
 
-#Running the models
+##Running the models
 
 To run a simulation using the framework we use:
 
@@ -68,7 +68,7 @@ In our earlier example:
 I would recommend using this second option, as it generates the figures relevant to the paper.
 
 
-#Generating the figures in the paper
+##Generating the figures in the paper
 
 If you want to regenerate all the modelling figures for the paper there are two commands you need to do.
 
@@ -85,7 +85,7 @@ To analyse all simulations:
 This will output the figures to `FIGS/ComparePhenotype`
 
 
-#####Running your first own simulation
+##Running your first own simulation
 
 If you want more freedome in defining your own simulations, then you
 can work directly with the `RetinalMap` class.
