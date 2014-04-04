@@ -46,7 +46,7 @@ To run a simulation using the framework we use:
 
     report = ComparePhenotypeModelling(phenotype,action,expNum,plotFigures,kMask,model);
 
-Here `phenotype specifies which phenotype you want to simulate, your
+Here `phenotype` specifies which phenotype you want to simulate, your
 standard options are `'WT'`,`'Isl2heterozygous'`, `'Isl2homozygous',
 `'ephrinA2mm'`, `'ephrinA5mm'`, `'ephrinA2mmA5mm'` and `'TKO'`; `action` is
 either `'run'` or `'analyse'`; `plotFigures` can be set to `true` or `false`;
