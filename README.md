@@ -51,7 +51,7 @@ standard options are `'WT'`,`'Isl2heterozygous'`, `'Isl2homozygous'`,
 `'ephrinA2mm'`, `'ephrinA5mm'`, `'ephrinA2mmA5mm'` and `'TKO'`; `action` is
 either `'run'` or `'analyse'`; `plotFigures` can be set to `true` or `false`;
 `kMask` is normally `0`, it specifies if we should use any cis-interaction
-to mask the gradients (not used in this study); model is one of `'Gierer2D'`, `'koulakov'`,
+to mask the gradients (not used in this study); `model` is one of `'Gierer2D'`, `'koulakov'`,
 `'WhiteCow'` or `'Markerinduction'`.
 
 For example:
