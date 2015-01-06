@@ -1,6 +1,5 @@
-{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf190
-{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fnil\fcharset0 Menlo-Regular;\f2\froman\fcharset0 Times-Roman;
-}
+{\rtf1\ansi\ansicpg1252\cocoartf1343\cocoasubrtf160
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fnil\fcharset0 Menlo-Regular;}
 {\colortbl;\red255\green255\blue255;}
 \paperw11900\paperh16840\margl1440\margr1440\vieww10800\viewh8400\viewkind0
 \pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
@@ -9,94 +8,28 @@
 \
 The RetinalMap object contains the code to set up the initial conditions for a simulation. The simulation can then be run either using the built in koulakov model, or using an external model such as Gierer, Whitelaw and Cowan, or Willshaw (Markerinduction). There is also code for running the Grimbert and Cang model.\
 \
-Github repository:\
-\
-https://github.com/Hjorthmedh/RetinalMap.git\
-\
 
 \b 0. Quickstart\
 
 \b0 \
-To take advantage of the optimised C-routines for the Koulakov model you need to first compile them (the file is in the @RetinalMap directory):\
+To take advantage of the optimised C-routines you need to first compile them:\
 \
 mex 
-\f1\fs22 \CocoaLigature0 stepFastGlobal.c\
-\
-\
-
-\f0\fs24 If you want to run the Willshaw model you need to also compile this file:\CocoaLigature1 \
-\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
-
-\f1\fs22 \cf0 \CocoaLigature0 \
-mex stepMarkerInductionC.c 
+\f1\fs22 \CocoaLigature0 @RetinalMap/stepFastGlobal.c
 \f0\fs24 \CocoaLigature1 \
-\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
-\cf0 \
 \
-Detailed instructions for how to install the Whitelaw model are in the WhitelawCowan directory, please see WhitelawCowan_manual.pdf. In short you do the following:\
-\
-In R:\
-\pard\pardeftab720\sa240
-
-\f1\fs22 \cf0 install.packages(c(\'93fields\'94))\
-\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
-
-\f0\fs24 \cf0 In the shell:\
-\pard\pardeftab720
-
-\f1\fs22 \cf0 cd /path/to/RetinalMap\
-$ R CMD INSTALL WhitelawCowan\
-\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
-
-\f0\fs24 \cf0 \
-\
-For detailed Gierer installation instructions, please see gierer/inst/running_gierer.pdf. The short instructions are as follows:\
-\
-At the R prompt:\
-\pard\pardeftab720
-
-\f1\fs22 \cf0 install.packages(c("sjevor"), contriburl="http://damtp.cam.ac.uk/user/eglen/r/")\
-\
-In the shell:\
-cd /path/to/RetinalMap\
-R CMD INSTALL gierer
-\f2\fs30 \
-\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
-
-\f0\fs24 \cf0 \
-\
-\
-\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
-\cf0 \CocoaLigature0 To get the map-analysis code, go to the parent directory and type:\
-\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
-
-\f1\fs22 \cf0 \
- git clone git://github.com/davidwillshaw/map-analysis.git
-\f0\fs24 \CocoaLigature1 \
-\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
-\cf0 \
-The RetinalMap and one map-analysis directories should now be in the same folder.\
-\
+On a windows machine you need to install Visual Studio ({\field{\*\fldinst{HYPERLINK "http://www.visualstudio.com/"}}{\fldrslt http://www.visualstudio.com/}}) first. Remember to click the compiler option when downloading. The built in compiler gives errors. On mac and linux machine the built in compilers work.\
 \
 If you just want to reproduce the simulations used in our published study then the easiest way is to use the wrapper script ComparePhenotypeModelling. \
 \
 report = ComparePhenotypeModelling(phenotype,action, ...\
                                                               expNum,plotFigures,kMask,model);\
 \
-Here phenotype specifies which phenotype you want to simulate, your standard options are 'WT','Isl2heterozygous', 'Isl2homozygous', 'ephrinA2mm', 'ephrinA5mm', 'ephrinA2mmA5mm' and 'TKO'; action is either 'run' or 'analyse'; plotFigures can be set to true or false; kMask is normally 0, it specifies if we should use any cis-interaction to mask the gradients; model is one of 'Gierer2D', 'koulakov', 'WhiteCow' or 'Markerinduction'.\
-\
-For example:\
-\
-report = ComparePhenotypeModelling(\'91WT\'92,\'92run\'92,1,1,0,\'92koulakov\'92);\
+Here phenotype specifies which phenotype you want to simulate, your standard options are 'WT','Isl2heterozygous', 'Isl2homozygous', 'ephrinA2mm', 'ephrinA5mm', 'ephrinA2mmA5mm' and 'TKO'; action is either 'run' or 'analyse'; expNumber is the ID number of your experiment (Feel free to choose any positive integer) plotFigures can be set to true or false; kMask is normally 0, it specifies if we should use any cis-interaction to mask the gradients; model is one of 'Gierer2D', 'koulakov', 'WhiteCow' or 'Markerinduction'.\
 \
 Once the simulation finishes you can use the same command but with 'analyse' as the action to get our first version of plots and summary sheets. However there is another version which has replaced it:\
 \
 report = makeFiguresForCompareArticle(phenotype,expRange,model,plotFigures)\
-\
-In our earlier example:\
-\
-report = makeFiguresForCompareArticle(\'91WT\'92,1,\'92koulakov\'92,1)\
-\
 \
 I would recommend using this second option, as it generates the figures relevant to the paper.\
 \
@@ -106,18 +39,17 @@ I would recommend using this second option, as it generates the figures relevant
 \
 If you want to regenerate all the modelling figures for the paper there are two commands you need to do.\
 \
-To run all simulations (called from matlab)\
+To run all simulations (in the terminal shell):\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\f1\fs22 \cf0 \CocoaLigature0 \
-runCompareArticleKoulakov\
-runCompareArticleGierer\
-runCompareArticleWhitelaw\
-runCompareArticleWillshaw
+\f1\fs22 \cf0 \CocoaLigature0 runCompareArticle
 \f0\fs24 \CocoaLigature1 \
 \pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
-\cf0 \
-To analyse all simulations:\
+\cf0 (or 
+\f1\fs22 \CocoaLigature0 runCompareArticleMac
+\f0\fs24 \CocoaLigature1 )\
+\
+To analyse all simulations (in matlab):\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
 \f1\fs22 \cf0 \CocoaLigature0 runCompareArticleMacAnalyseAll
