@@ -25,7 +25,7 @@ detailed instructions for them can be found in a PDF in respective subdirectory.
 In R:
 
     install.packages(c("sjevor"), contriburl="http://damtp.cam.ac.uk/user/eglen/r/")
-    install.packages(c(“fields”))
+    install.packages(c("fields"))
 
 In the shell (make sure you are in the RetinalMap directory):
 
