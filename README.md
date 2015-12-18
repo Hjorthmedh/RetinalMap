@@ -56,7 +56,7 @@ to mask the gradients (not used in this study); `model` is one of `'Gierer2D'`, 
 
 For example:
 
-    report = ComparePhenotypeModelling(‘WT’,’run’,1,1,0,’koulakov’);
+    report = ComparePhenotypeModelling('WT','run',1,1,0,'koulakov');
 
 Once the simulation finishes you can use the same command but with `'analyse'` as the action to get our first version of plots and summary sheets. However there is another version which has replaced it:
 
@@ -64,7 +64,7 @@ Once the simulation finishes you can use the same command but with `'analyse'` a
 
 In our earlier example:
 
-    report = makeFiguresForCompareArticle(‘WT’,1,’koulakov’,1)
+    report = makeFiguresForCompareArticle('WT',1,'koulakov',1)
 
 I would recommend using this second option, as it generates the figures relevant to the paper.
 
