@@ -19,14 +19,13 @@ display.locations <- function(g, main="",tectum=TRUE,
                               xmin=min(g$axon.positions[,1]), xmax=max(g$axon.positions[,1]), 
                               ymin=min(g$axon.positions[,2]), ymax=max(g$axon.positions[,2]),
                               label=FALSE,
-                              asp=1,
                               ...) {
   ## show the active tectal or retinal locations
 
   if (tectum==TRUE) {
     tect.pos <- g$tect.positions[which(g$tect.status==1),]
     plot(tect.pos, pch=4, col="grey", cex=0.3, xlab="x", ylab="y", main=main,
-         axes=F, frame.plot=T, ...)
+         axes=F, frame.plot=T, asp=1, ...)
     ##axis(1,at=c(0,1),labels=c("Caudal","Rostral"),cex=2.5)
     axis(1,at=c(0,1),labels=c("Anterior","Posterior"),cex=2.5)
     axis(2,at=c(0,1),labels=c("Medial","Lateral"),cex=2.5)
@@ -36,9 +35,10 @@ display.locations <- function(g, main="",tectum=TRUE,
     ## Display the retina.
     axons.in.use<-unique(g$cone.axons[which(g$cone.status==1)])
     axon.pos <- g$axon.positions[axons.in.use,]
-    plot(axon.pos, pch=16, cex=2, xlab="u", ylab="v", axes=F, frame.plot=T,
+    plot(axon.pos, pch=20, cex=1, xlab="u", ylab="v", axes=F, frame.plot=T,
          xlim=c(1,0), ylim=c(1,0),      #manipulate retinal origin. TODO
          main = "The Retina",
+         asp=1,
          col = colour.map(axon.pos[,1], axon.pos[,2],xmin,xmax,ymin,ymax), ...)
     axis(1,at=c(0,1),labels=c("Nasal","Temporal"),cex=2.5)
     axis(2,at=c(0,1),labels=c("Dorsal", "Ventral"),cex=2.5)
